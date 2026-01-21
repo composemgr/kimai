@@ -1,0 +1,55 @@
+# nginx proxy address - http://172.17.0.1:8075
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "5m"
+    max-file: "1"
+
+services:
+  kimai:
+    image: kimai/kimai2:latest
+    container_name: kimai-app
+    restart: unless-stopped
+    logging: *default-logging
+    networks:
+      - kimai
+    ports:
+      - "8075:8001"
+    environment:
+      TZ: ${TZ:-America/New_York}
+    volumes:
+      - ./rootfs/data/kimai:/data
+      - ./rootfs/config/kimai:/config
+    depends_on:
+      - kimai-db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  kimai-db:
+    image: mariadb:11
+    container_name: kimai-db
+    restart: unless-stopped
+    logging: *default-logging
+    networks:
+      - kimai
+    environment:
+      TZ: ${TZ:-America/New_York}
+      MARIADB_DATABASE: ${DB_CREATE_DATABASE_NAME:-kimai}
+      MARIADB_USER: ${DB_USER_NAME:-kimai}
+      MARIADB_PASSWORD: ${DB_USER_PASS:-changeme_db_password}
+      MARIADB_ROOT_PASSWORD: ${DB_ADMIN_PASS:-changeme_root_password}
+    volumes:
+      - ./rootfs/db/mariadb/kimai:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  kimai:
+    external: false
