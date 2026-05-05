@@ -50,9 +50,9 @@ See `docker-compose.yaml` for complete list of configurable options.
 
 ## 📂 Volumes
 
-- `./rootfs/data/kimai` - Data storage
-- `./rootfs/config/kimai` - Data storage
-- `./rootfs/data/db/mariadb/kimai` - Data storage
+- `./volumes/data/kimai` - Data storage
+- `./volumes/config/kimai` - Data storage
+- `./volumes/data/db/mariadb/kimai` - Data storage
 
 ## 🔐 Security
 
