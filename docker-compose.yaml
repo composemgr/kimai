@@ -1,5 +1,6 @@
 # nginx proxy address - http://172.17.0.1:8075
 
+name: kimai
 x-logging: &default-logging
   driver: json-file
   options:
@@ -9,20 +10,29 @@ x-logging: &default-logging
 services:
   kimai:
     image: kimai/kimai2:latest
+    pull_policy: always
     container_name: kimai-app
-    restart: unless-stopped
+    restart: always
     logging: *default-logging
     networks:
       - kimai
     ports:
-      - "8075:8001"
+      - "172.17.0.1:8075:8001"
     environment:
       TZ: ${TZ:-America/New_York}
+      APP_ENV: prod
+      TRUSTED_HOSTS: ${BASE_HOST_NAME:-localhost}
+      ADMINMAIL: ${APP_ADMIN_USER:-admin}@${BASE_DOMAIN_NAME:-example.com}
+      ADMINPASS: ${APP_ADMIN_PASS:-changeme_admin_password}
+      DATABASE_URL: mysql://${DB_USER_NAME:-kimai}:${DB_USER_PASS:-changeme_db_password}@kimai-db:3306/${DB_CREATE_DATABASE_NAME:-kimai}?charset=utf8mb4&serverVersion=mariadb-10.11.0
+      MAILER_FROM: ${EMAIL_SERVER_MAIL_FROM:-kimai@example.com}
+      MAILER_URL: smtp://${EMAIL_SERVER_HOST:-172.17.0.1}:${EMAIL_SERVER_PORT:-587}
     volumes:
-      - ./volumes/data/kimai:/data
-      - ./volumes/config/kimai:/config
+      - ./volumes/data/kimai:/opt/kimai/var/data
+      - ./volumes/config/kimai:/opt/kimai/config/packages/local
     depends_on:
-      - kimai-db
+      kimai-db:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8001"]
       interval: 30s
@@ -30,9 +40,10 @@ services:
       retries: 3
 
   kimai-db:
-    image: mariadb:11
+    image: mariadb:latest
+    pull_policy: always
     container_name: kimai-db
-    restart: unless-stopped
+    restart: always
     logging: *default-logging
     networks:
       - kimai
@@ -41,7 +52,7 @@ services:
       MARIADB_DATABASE: ${DB_CREATE_DATABASE_NAME:-kimai}
       MARIADB_USER: ${DB_USER_NAME:-kimai}
       MARIADB_PASSWORD: ${DB_USER_PASS:-changeme_db_password}
-      MARIADB_ROOT_PASSWORD: ${DB_ADMIN_PASS:-changeme_root_password}
+      MARIADB_ROOT_PASSWORD: ${DB_ADMIN_PASS:-changeme_admin_password}
     volumes:
       - ./volumes/data/db/mariadb/kimai:/var/lib/mysql
     healthcheck:
@@ -52,4 +63,5 @@ services:
 
 networks:
   kimai:
+    name: kimai
     external: false
