@@ -26,7 +26,7 @@ services:
       TRUSTED_HOSTS: ${BASE_HOST_NAME:-localhost}
       ADMINMAIL: ${APP_ADMIN_USER:-admin}@${BASE_DOMAIN_NAME:-example.com}
       ADMINPASS: ${APP_ADMIN_PASS:-changeme_admin_password}
-      DATABASE_URL: mysql://${DB_USER_NAME:-kimai}:${DB_USER_PASS:-changeme_db_password}@kimai-db:3306/${DB_CREATE_DATABASE_NAME:-kimai}?charset=utf8mb4&serverVersion=mariadb-10.11.0
+      DATABASE_URL: mysql://${DB_USER_NAME:-kimai}:${DB_USER_PASS:-changeme_db_password}@kimai-db:3306/${DB_CREATE_DATABASE_NAME:-kimai}?charset=utf8mb4&serverVersion=mariadb-11.4.0
       MAILER_FROM: ${EMAIL_SERVER_MAIL_FROM:-kimai@example.com}
       MAILER_URL: smtp://${EMAIL_SERVER_HOST:-172.17.0.1}:${EMAIL_SERVER_PORT:-587}
       CONTAINER_NAME: kimai-app
